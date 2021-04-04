@@ -4,10 +4,7 @@ import StockInfo from 'containers/StockInfo';
 export default function Index( { test } ) {
 
   return (
-    <>
-    <h1>Actions!</h1>
     <StockInfo />
-    </>
   );
 }
 
