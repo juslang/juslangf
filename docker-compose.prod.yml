@@ -6,11 +6,13 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: frontend
-    restart: unless-stopped
+    # restart: unless-stopped
     volumes:
       - .:/home/node/app
-      - /home/node/app/node_modules
-      - /home/node/app/.next
-    ports:
-      - 3000:3000
+      - node_modules:/home/node/app/node_modules
+      - next:/home/node/app/.next
     command: npm run build
+
+volumes:
+  node_modules:
+  next:
