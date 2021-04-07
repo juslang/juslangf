@@ -1,0 +1,20 @@
+version: '3.7'
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: frontend
+    restart: unless-stopped
+    volumes:
+      - .:/home/node/app
+      - node_modules:/home/node/app/node_modules
+      - next:/home/node/app/.next
+    ports:
+      - 3000:3000
+    command: npm run dev
+
+volumes:
+  node_modules:
+  next:
