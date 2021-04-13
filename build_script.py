@@ -37,16 +37,17 @@ def Main():
 
     dst_path = '/root/server/webserver/dist/'
     if not os.path.isdir(dst_path):
-      os.mkdir(dst_path)
-      if VERBOSE:
-        print(f"build_script.py: created {dst_path}.")
+      os.makedirs(dst_path)
+      print(f"build_script.py: created {dst_path}.")
 
     ret_out = sp.check_output(['docker-compose', '-f', 'docker-compose.prod.yml', 'up'], stderr=DEVNULL).decode(encoding).strip()
+    print(f"docker-compose up result: {ret_out}")
     if ret_out:
-      ret_out = sp.check_output(['cp', '-rf', 'out/*', dst_path], stderr=DEVNULL).decode(encoding).strip()
-      if VERBOSE:
-        print(f"build_script.py: successfully copied to {dst_path}.")
+      # ret_out = sp.check_output(['cp', '-rf', 'out/*', dst_path], stderr=DEVNULL).decode(encoding).strip()
+      os.system("cp -rf out/* /root/server/webserver/dist/")
+      print(f"build_script.py: successfully copied to {dst_path}.")
     ret_out = sp.check_output(['docker-compose', '-f', 'docker-compose.prod.yml', 'down'], stderr=DEVNULL).decode(encoding).strip()
+    print(f"docker-compose down result: {ret_out}")
 
 
 if __name__ == '__main__':
