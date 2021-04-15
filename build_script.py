@@ -2,6 +2,8 @@ import subprocess as sp
 import argparse
 import sys
 import os
+from subprocess import CalledProcessError
+
 
 
 # Set this to the version number of the script
@@ -31,29 +33,43 @@ def Main():
 
     VERBOSE=(args.verbose and args.verbose > 0)
 
+    cur_path = os.getcwd()
     dst_path = '/root/server/webserver/dist/'
     if not os.path.isdir(dst_path):
       os.makedirs(dst_path)
       print(f"build_script.py: created {dst_path}.")
 
+    # turn off service to avoid build error
+    os.chdir('/root/server')
     try:
-      ret_out = sp.check_call('docker-compose -f docker-compose.prod.yml up', shell=True)
+      if os.path.isfile('docker-compose.prod.yml'):
+        ret_out = sp.check_call('docker-compose -f docker-compose.prod.yml down', shell=True)
     except CalledProcessError as e:
-      print(e.output.decode())
+      print(e)
     
     print(f"docker-compose up result: {ret_out}")
+
+    os.chdir(cur_path)
+    try:
+      ret_out = sp.check_call('docker-compose -f docker-compose.prod.yml up --build', shell=True)
+    except CalledProcessError as e:
+      print(e)
+
     try:
       ret_out = sp.check_call("cp -rf out/* /root/server/webserver/dist/", shell=True)
     except CalledProcessError as e:
-      print(e.output.decode())
-    
+      print(e)
+   
     print(f"successfully copied to {dst_path}, ret_out:{ret_out}")
+
+    os.chdir('/root/server')
     try:
-      ret_out = sp.check_call('docker-compose -f docker-compose.prod.yml down', shell=True)
+      if os.path.isfile('docker-compose.prod.yml'):
+        ret_out = sp.check_call('docker-compose -f docker-compose.prod.yml up --build -d', shell=True)
     except CalledProcessError as e:
-      print(e.output.decode())
+      print(e)
     
-    print(f"docker-compose down result: {ret_out}")
+    print(f"docker-compose up result: {ret_out}")
 
 
 if __name__ == '__main__':
