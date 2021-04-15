@@ -2,16 +2,12 @@ import subprocess as sp
 import argparse
 import sys
 import os
-import locale
 
 
 # Set this to the version number of the script
 VERSION = "0.0.1"
 
 VERBOSE = False
-
-DEVNULL = open(os.devnull, 'w')
-encoding = locale.getpreferredencoding()
 
 class BuildScriptError(Exception):
     """An Exception thrown by build_sript"""
@@ -40,13 +36,23 @@ def Main():
       os.makedirs(dst_path)
       print(f"build_script.py: created {dst_path}.")
 
-    ret_out = sp.check_output(['docker-compose', '-f', 'docker-compose.prod.yml', 'up'], stderr=DEVNULL).decode(encoding).strip()
+    try:
+      ret_out = sp.check_call('docker-compose -f docker-compose.prod.yml up', shell=True)
+    except CalledProcessError as e:
+      print(e.output.decode())
+    
     print(f"docker-compose up result: {ret_out}")
-    if ret_out:
-      # ret_out = sp.check_output(['cp', '-rf', 'out/*', dst_path], stderr=DEVNULL).decode(encoding).strip()
-      os.system("cp -rf out/* /root/server/webserver/dist/")
-      print(f"build_script.py: successfully copied to {dst_path}.")
-    ret_out = sp.check_output(['docker-compose', '-f', 'docker-compose.prod.yml', 'down'], stderr=DEVNULL).decode(encoding).strip()
+    try:
+      ret_out = sp.check_call("cp -rf out/* /root/server/webserver/dist/", shell=True)
+    except CalledProcessError as e:
+      print(e.output.decode())
+    
+    print(f"successfully copied to {dst_path}, ret_out:{ret_out}")
+    try:
+      ret_out = sp.check_call('docker-compose -f docker-compose.prod.yml down', shell=True)
+    except CalledProcessError as e:
+      print(e.output.decode())
+    
     print(f"docker-compose down result: {ret_out}")
 
 
